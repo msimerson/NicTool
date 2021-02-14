@@ -1,0 +1,42 @@
+
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Ubuntu packages
+        run: .test/setup-ubuntu.sh
+
+      - name: TLS setup
+        run: .test/setup-tls.sh
+
+      - name: MySQL setup
+        run: .test/setup-mysql.sh
+
+      - name: Apache setup
+        run: .test/setup-apache.sh
+
+      - name: NicToolClient tests
+        run: make -C client test
+
+      - name: NicToolServer tests
+        run: make -C server test
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
